@@ -4,7 +4,6 @@ class AppUser {
   String id;
   String email;
   String username;
-
   // Default constructor
   AppUser({
     required this.id,

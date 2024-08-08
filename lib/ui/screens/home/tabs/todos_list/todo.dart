@@ -1,15 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:todo/ui/model/todo_dm.dart';
+import 'package:todo/ui/providers/list_provider.dart';
 import 'package:todo/ui/utils/app_colors.dart';
 import 'package:todo/ui/utils/app_style.dart';
 
 class Todo extends StatelessWidget {
   final TodoDM item;
 
-  const Todo({super.key, required this.item});
+  Todo({super.key, required this.item});
+
+  late ListProvider listProvider;
 
   @override
   Widget build(BuildContext context) {
+    listProvider = Provider.of(context);
     return Container(
       height: MediaQuery.of(context).size.height * .13,
       decoration: BoxDecoration(
@@ -25,7 +31,9 @@ class Todo extends StatelessWidget {
             width: 24,
           ),
           buildTodoInfo(),
-          SizedBox(width: 16,),
+          SizedBox(
+            width: 16,
+          ),
           buildTodoState()
         ],
       ),
@@ -36,7 +44,7 @@ class Todo extends StatelessWidget {
         height: MediaQuery.of(context).size.height * .07,
         width: 4,
         decoration: BoxDecoration(
-            color: AppColors.primary,
+            color: item.isDone ? Colors.green : AppColors.primary,
             borderRadius: BorderRadius.circular(10)),
       );
 
@@ -49,8 +57,8 @@ class Todo extends StatelessWidget {
               item.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppStyle.bottomSheetTitle
-                  .copyWith(color: AppColors.primary),
+              style: AppStyle.bottomSheetTitle.copyWith(
+                  color: item.isDone ? Colors.green : AppColors.primary),
             ),
             Spacer(),
             Text(
@@ -64,18 +72,26 @@ class Todo extends StatelessWidget {
         ),
       );
 
-  buildTodoState() => item.isDone ? buildCheckedState() : buildUnCheckedState();
+  buildTodoState() => InkWell(
+        onTap: () async {
+          await TodoDM.userTodosCollection
+              .doc(item.id)
+              .update({"isDone": !item.isDone});
+          listProvider.loadTodoFromFirestore();
+        },
+        child: item.isDone ? buildCheckedState() : buildUnCheckedState(),
+      );
 
   Container buildCheckedState() {
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: AppColors.primary),
+          borderRadius: BorderRadius.circular(10), color: AppColors.primary),
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      child: Icon(
-        Icons.done,
-        color: AppColors.white,
-        size: 30,
+      child: Text(
+        "Done",
+        style: TextStyle(
+            fontSize: 30,
+            color: item.isDone ? Colors.green : AppColors.primary),
       ),
     );
   }
@@ -83,8 +99,7 @@ class Todo extends StatelessWidget {
   Container buildUnCheckedState() {
     return Container(
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: AppColors.primary),
+          borderRadius: BorderRadius.circular(10), color: AppColors.primary),
       padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Icon(
         Icons.done,

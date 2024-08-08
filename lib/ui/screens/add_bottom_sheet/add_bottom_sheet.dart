@@ -68,8 +68,8 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
             child: Text(
                 "${selectedDate.day}/${selectedDate.month}/${selectedDate.year}",
                 textAlign: TextAlign.center,
-                style: AppStyle.bottomSheetTitle
-                    .copyWith(color: AppColors.grey)),
+                style:
+                    AppStyle.bottomSheetTitle.copyWith(color: AppColors.grey)),
           ),
           const Spacer(),
           ElevatedButton(
@@ -93,9 +93,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
   }
 
   void addTodoToFirestore() async {
-    CollectionReference todosCollection =
-        FirebaseFirestore.instance.collection(AppUser.collectionName)
-            .doc(AppUser.currentUser!.id).collection(TodoDM.collectionName);
+    CollectionReference todosCollection = TodoDM.userTodosCollection;
     DocumentReference documentReference = todosCollection.doc();
     TodoDM newTodo = TodoDM(
         id: documentReference.id,
@@ -104,7 +102,7 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         date: selectedDate,
         isDone: false);
     await documentReference.set(newTodo.toJson());
-      listProvider.loadTodoFromFirestore();
-      Navigator.pop(context);
+    listProvider.loadTodoFromFirestore();
+    Navigator.pop(context);
   }
 }

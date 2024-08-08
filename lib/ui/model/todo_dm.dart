@@ -1,3 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'app_user.dart';
+
 class TodoDM {
   static const collectionName = "todos";
   late String id;
@@ -14,7 +18,12 @@ class TodoDM {
     required this.isDone,
   });
 
-  TodoDM.fromJson(Map<String, dynamic> json){
+  static CollectionReference get userTodosCollection => FirebaseFirestore.instance
+      .collection(AppUser.collectionName)
+      .doc(AppUser.currentUser!.id)
+      .collection(TodoDM.collectionName);
+
+  TodoDM.fromJson(Map<String, dynamic> json) {
     id = json["id"];
     title = json["title"];
     description = json["description"];
@@ -24,10 +33,10 @@ class TodoDM {
   }
 
   Map<String, dynamic> toJson() => {
-    "id": id,
-    "title": title,
-    "description": description,
-    "date": date.millisecondsSinceEpoch,
-    "isDone": isDone
-  };
+        "id": id,
+        "title": title,
+        "description": description,
+        "date": date.millisecondsSinceEpoch,
+        "isDone": isDone
+      };
 }
