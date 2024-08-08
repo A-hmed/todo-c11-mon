@@ -8,39 +8,39 @@ abstract class AppTheme{
     scaffoldBackgroundColor: AppColors.bgColor,
     canvasColor: AppColors.white,
     colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.primaryColor,
-      primary: AppColors.primaryColor,
+        seedColor: AppColors.primary,
+      primary: AppColors.primary,
       secondary: AppColors.white,
       onPrimary: AppColors.white,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: AppColors.primaryColor,
+      backgroundColor: AppColors.primary,
       centerTitle: true
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: AppColors.white,
-      selectedItemColor: AppColors.primaryColor,
+      selectedItemColor: AppColors.primary,
       unselectedItemColor: Colors.grey,
     ),
   );
 
   static ThemeData dark = ThemeData(
     useMaterial3: false,
-    scaffoldBackgroundColor: AppColors.bgDarkColor,
+    scaffoldBackgroundColor: AppColors.bgDark,
     canvasColor: AppColors.black,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: AppColors.primaryColor,
-      primary: AppColors.primaryColor,
+      seedColor: AppColors.primary,
+      primary: AppColors.primary,
       secondary: AppColors.black,
       onPrimary: AppColors.black,
     ),
     appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.primaryColor,
+        backgroundColor: AppColors.primary,
         centerTitle: true
     ),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: AppColors.black,
-      selectedItemColor: AppColors.primaryColor,
+      selectedItemColor: AppColors.primary,
       unselectedItemColor: Colors.white,
     ),
   );
