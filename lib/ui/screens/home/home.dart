@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:todo/ui/model/app_user.dart';
+import 'package:todo/ui/providers/list_provider.dart';
 import 'package:todo/ui/screens/add_bottom_sheet/add_bottom_sheet.dart';
+import 'package:todo/ui/screens/auth/login/login_screen.dart';
 import 'package:todo/ui/screens/home/tabs/todos_list/todos_list.dart';
 import 'package:todo/ui/screens/home/tabs/settings.dart';
 import 'package:todo/ui/utils/app_colors.dart';
@@ -17,22 +21,33 @@ class _HomeScreenState extends State<HomeScreen> {
    int index = 0;
 
    List<Widget> screens = [TodosList() , const Settings()];
+   late ListProvider listProvider;
 
   @override
   Widget build(BuildContext context) {
+    listProvider = Provider.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         centerTitle: false,
-        title: const Padding(
-          padding: EdgeInsetsDirectional.only(
+        title: Padding(
+          padding: const EdgeInsetsDirectional.only(
             start: 30,
           ),
           child: Text(
-            'ToDo app',
+            'Welcome back ${AppUser.currentUser!.username}',
             style: AppStyle.appBarStyle,
           ),
         ),
+        actions: [
+          InkWell(
+              onTap: (){
+                listProvider.reset();
+                Navigator.pushReplacementNamed(context, LoginScreen.routeName);
+              },
+              child: Icon(Icons.logout)
+          )
+        ],
       ),
       body: screens[index],
       bottomNavigationBar: buildBottomAppBar(),

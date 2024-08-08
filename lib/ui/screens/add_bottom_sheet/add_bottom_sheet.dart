@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:todo/ui/model/app_user.dart';
 import 'package:todo/ui/model/todo_dm.dart';
 import 'package:todo/ui/providers/list_provider.dart';
 import 'package:todo/ui/utils/app_colors.dart';
@@ -91,9 +92,10 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
     setState(() {});
   }
 
-  void addTodoToFirestore() {
+  void addTodoToFirestore() async {
     CollectionReference todosCollection =
-        FirebaseFirestore.instance.collection(TodoDM.collectionName);
+        FirebaseFirestore.instance.collection(AppUser.collectionName)
+            .doc(AppUser.currentUser!.id).collection(TodoDM.collectionName);
     DocumentReference documentReference = todosCollection.doc();
     TodoDM newTodo = TodoDM(
         id: documentReference.id,
@@ -101,9 +103,8 @@ class _AddBottomSheetState extends State<AddBottomSheet> {
         description: description,
         date: selectedDate,
         isDone: false);
-    documentReference.set(newTodo.toJson()).timeout(Duration(milliseconds: 500), onTimeout: () {
+    await documentReference.set(newTodo.toJson());
       listProvider.loadTodoFromFirestore();
       Navigator.pop(context);
-    });
   }
 }

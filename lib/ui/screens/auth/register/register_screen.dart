@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:todo/ui/model/app_user.dart';
+import 'package:todo/ui/screens/home/home.dart';
+import 'package:todo/ui/utils/dialog_utils.dart';
 
 class RegisterScreen extends StatefulWidget {
   static const String routeName = "register";
@@ -69,7 +73,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 height: MediaQuery.of(context).size.height * .2,
               ),
               ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    createAccount();
+                  },
                   child: const Padding(
                     padding: EdgeInsets.symmetric(vertical: 16, horizontal: 12),
                     child: Row(
@@ -88,5 +94,49 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
       ),
     );
+  }
+
+  void createAccount() async {
+    try {
+      showLoading(context);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      AppUser newUser = AppUser(id: userCredential.user!.uid, email: email, username: username);
+      await addUserToFireStore(newUser);
+      AppUser.currentUser = newUser;
+      hideDialog(context);
+      Navigator.pushNamed(context, HomeScreen.routeName);
+    } on FirebaseAuthException catch (authError) {
+      hideDialog(context);
+
+      ///Hide loading
+      String message = "";
+      if (authError.code == 'weak-password') {
+        message = "The password provided is too weak";
+      } else if (authError.code == 'email-already-in-use') {
+        message = "The account already exists for that email.";
+      } else {
+        message =
+            authError.message ?? "Something went wrong please try again later";
+      }
+      if (context.mounted) {
+        showMessage(context,
+            title: "Error", body: message, posButtonTitle: "ok");
+      }
+    } catch (error) {
+      hideDialog(context);
+
+      ///Hide loading
+      print("Error = $error");
+      showMessage(context,
+          title: "Error!", body: "Something went wrong please later");
+    }
+  }
+
+  Future addUserToFireStore(AppUser user) async{
+    CollectionReference usersCollection =
+    FirebaseFirestore.instance.collection(AppUser.collectionName);
+    DocumentReference userDoc = usersCollection.doc(user.id);
+    await userDoc.set(user.toJson());
   }
 }

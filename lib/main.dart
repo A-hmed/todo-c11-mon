@@ -18,7 +18,6 @@ void main() async {
   );
   FirebaseFirestore.instance.settings =
       Settings(persistenceEnabled: true);
-  FirebaseFirestore.instance.disableNetwork();
   runApp(ChangeNotifierProvider(
       create: (_) => ListProvider(),
       child: const MyApp()));

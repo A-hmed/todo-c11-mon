@@ -1,6 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:todo/ui/model/app_user.dart';
 import 'package:todo/ui/screens/auth/register/register_screen.dart';
 import 'package:todo/ui/utils/extensions.dart';
+
+import '../../../utils/dialog_utils.dart';
+import '../../home/home.dart';
 
 class LoginScreen extends StatefulWidget {
   static const String routeName = "login";
@@ -93,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 ElevatedButton(
                     onPressed: () {
-                      formKey.currentState!.validate();
+                      signIn();
                     },
                     child: const Padding(
                       padding:
@@ -127,5 +133,49 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void signIn() async {
+    if(!formKey.currentState!.validate()) return;
+    try {
+      showLoading(context);
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+      AppUser.currentUser = await getUserFromFireStore(userCredential.user!.uid);
+      hideDialog(context);
+      Navigator.pushReplacementNamed(context, HomeScreen.routeName);
+    } on FirebaseAuthException catch (authError) {
+      print("FirebaseAuthException = ${authError.code}");
+      hideDialog(context);
+
+      ///Hide loading
+      String message = "";
+      if (authError.code == 'channel-error') {
+        message = "Wrong email or password Pleas double your creds.";
+      } else {
+        message =
+            authError.message ?? "Something went wrong please try again later";
+      }
+      if (context.mounted) {
+        showMessage(context,
+            title: "Error", body: message, posButtonTitle: "ok");
+      }
+    } catch (error) {
+      hideDialog(context);
+
+      ///Hide loading
+      print("Error = $error");
+      showMessage(context,
+          title: "Error!", body: "Something went wrong please later");
+    }
+  }
+
+  Future<AppUser> getUserFromFireStore(String id) async {
+    CollectionReference usersCollection =
+        FirebaseFirestore.instance.collection(AppUser.collectionName);
+    DocumentReference userDoc = usersCollection.doc(id);
+    DocumentSnapshot snapshot = await userDoc.get();
+    Map<String, dynamic> json = snapshot.data() as Map<String, dynamic>;
+    return AppUser.fromJson(json);
   }
 }
